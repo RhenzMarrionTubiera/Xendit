@@ -11,13 +11,13 @@ const jsonParser = bodyParser.json();
 
 module.exports = (db) => {
     //For getting the health of the response if returned status 200
-    app.get('/health', (req, res) => {
-        res.send('Healthy');
+    app.get('/health', async (req, res) => {
+       await res.send('Healthy');
     });
 
     //For viewing Documentation
-    app.get('/viewDocumentation', (req, res) => {
-        res.render('docuView');
+    app.get('/viewDocumentation', async (req, res) => {
+       await res.render('docuView');
     });
 
     //For inserting/inputting rides into database using JSON as a request body then upon sucessful the inputted values will be displayed as JSON response
@@ -85,7 +85,7 @@ module.exports = (db) => {
             driverVehicle
         ];
         
-        const result = db.run('INSERT INTO Rides(startLat, startLong, endLat, endLong, riderName, driverName, driverVehicle) VALUES (?, ?, ?, ?, ?, ?, ?)', values, function (err) {
+        const result = db.run('INSERT INTO Rides(startLat, startLong, endLat, endLong, riderName, driverName, driverVehicle) VALUES (?, ?, ?, ?, ?, ?, ?)', values, async function (err) {
             if (err) {
                 return res.send({
                     error_code: 'SERVER_ERROR',
@@ -93,7 +93,7 @@ module.exports = (db) => {
                 });
             }
 
-            db.all('SELECT * FROM Rides WHERE rideID = ?', this.lastID, function (err, rows) {
+            await db.all('SELECT * FROM Rides WHERE rideID = ?', this.lastID, function (err, rows) {
                 if (err) {
                     return res.send({
                         error_code: 'SERVER_ERROR',
@@ -108,8 +108,8 @@ module.exports = (db) => {
 
     //For getting all the rides
     //EX.) localhost:8010/getRides
-    app.get('/getRides', (req, res) => {
-        db.all('SELECT * FROM Rides', function (err, rows) {
+    app.get('/getRides', async (req, res) => {
+        await db.all('SELECT * FROM Rides', function (err, rows) {
             if (err) {
                 return res.send({
                     error_code: 'SERVER_ERROR',
@@ -130,8 +130,8 @@ module.exports = (db) => {
 
     //For getting the specific ride based from the rideID from the schema
     //EX.) localhost:8010/selectRides/1
-    app.get('/selectRides/:id', (req, res) => {
-        db.all(`SELECT * FROM Rides WHERE rideID='${req.params.id}'`, function (err, rows) {
+    app.get('/selectRides/:id', async (req, res) => {
+        await db.all(`SELECT * FROM Rides WHERE rideID='${req.params.id}'`, function (err, rows) {
             if (err) {
                 return res.send({
                     error_code: 'SERVER_ERROR',
