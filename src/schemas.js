@@ -1,5 +1,6 @@
 'use strict';
 
+//For creating database schema uon runtime
 module.exports = (db) => {
     const createRideTableSchema = `
         CREATE TABLE Rides

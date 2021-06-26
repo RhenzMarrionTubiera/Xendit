@@ -3,13 +3,35 @@
 const express = require('express');
 const app = express();
 
+app.set('view engine', 'ejs');
+app.set('views', './src');
+
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
 
 module.exports = (db) => {
-    app.get('/health', (req, res) => res.send('Healthy'));
+    //For getting the health of the response if returned status 200
+    app.get('/health', (req, res) => {
+        res.send('Healthy');
+    });
 
-    app.post('/rides', jsonParser, (req, res) => {
+    //For viewing Documentation
+    app.get('/viewDocumentation', (req, res) => {
+        res.render('docuView');
+    });
+
+    //For inserting/inputting rides into database using JSON as a request body then upon sucessful the inputted values will be displayed as JSON response
+    //EX.) localhost:8010/inputRides
+    // {
+    //     "start_lat":50,
+    //     "start_long":100,
+    //     "end_lat":50,
+    //     "end_long":100,
+    //     "rider_name":"rhenz",
+    //     "driver_name":"nonPro",
+    //     "driver_vehicle":"toyota"
+    // }
+    app.post('/inputRides', jsonParser, (req, res) => {
         const startLatitude = Number(req.body.start_lat);
         const startLongitude = Number(req.body.start_long);
         const endLatitude = Number(req.body.end_lat);
@@ -53,7 +75,15 @@ module.exports = (db) => {
             });
         }
 
-        var values = [req.body.start_lat, req.body.start_long, req.body.end_lat, req.body.end_long, req.body.rider_name, req.body.driver_name, req.body.driver_vehicle];
+        var values = [
+            startLatitude, 
+            startLongitude, 
+            endLatitude, 
+            endLongitude, 
+            riderName, 
+            driverName, 
+            driverVehicle
+        ];
         
         const result = db.run('INSERT INTO Rides(startLat, startLong, endLat, endLong, riderName, driverName, driverVehicle) VALUES (?, ?, ?, ?, ?, ?, ?)', values, function (err) {
             if (err) {
@@ -76,7 +106,9 @@ module.exports = (db) => {
         });
     });
 
-    app.get('/rides', (req, res) => {
+    //For getting all the rides
+    //EX.) localhost:8010/getRides
+    app.get('/getRides', (req, res) => {
         db.all('SELECT * FROM Rides', function (err, rows) {
             if (err) {
                 return res.send({
@@ -96,7 +128,9 @@ module.exports = (db) => {
         });
     });
 
-    app.get('/rides/:id', (req, res) => {
+    //For getting the specific ride based from the rideID from the schema
+    //EX.) localhost:8010/selectRides/1
+    app.get('/selectRides/:id', (req, res) => {
         db.all(`SELECT * FROM Rides WHERE rideID='${req.params.id}'`, function (err, rows) {
             if (err) {
                 return res.send({
